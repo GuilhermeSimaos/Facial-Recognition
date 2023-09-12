@@ -12,8 +12,8 @@ camera.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
 camera.set(cv2.CAP_PROP_FOURCC, 0x32595559)
 camera.set(cv2.CAP_PROP_FPS, 60)
 
-known_face_encodings = []
-known_face_names = []
+# known_face_encodings = []
+# known_face_names = []
 
 desired_width = 640
 desired_heigth = 480
@@ -30,6 +30,9 @@ def initialize_known_faces():
             known_face_encodings.append(face_encoding[0])
             known_face_names.append(face_name)
     return known_face_encodings, known_face_names
+
+
+known_face_encodings, known_face_names = initialize_known_faces()
 
 
 def generate_frames():
@@ -149,6 +152,6 @@ def register_face():
         return jsonify({'message': 'Erro ao registrar o rosto.'}), 500
 
 
-if __name__ == '__main__':
-    known_face_encodings, known_face_names = initialize_known_faces()
-    app.run(debug=True, host='0.0.0.0')
+# if __name__ == '__main__':
+#     known_face_encodings, known_face_names = initialize_known_faces()
+#     app.run(debug=True, host='0.0.0.0')
