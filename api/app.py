@@ -32,9 +32,6 @@ def initialize_known_faces():
     return known_face_encodings, known_face_names
 
 
-known_face_encodings, known_face_names = initialize_known_faces()
-
-
 def generate_frames():
     process_this_frame = True
     while True:
@@ -152,6 +149,6 @@ def register_face():
         return jsonify({'message': 'Erro ao registrar o rosto.'}), 500
 
 
-# if __name__ == '__main__':
-#     known_face_encodings, known_face_names = initialize_known_faces()
-#     app.run(debug=True, host='0.0.0.0')
+if __name__ == '__main__':
+    known_face_encodings, known_face_names = initialize_known_faces()
+    app.run(debug=True, host='0.0.0.0')
