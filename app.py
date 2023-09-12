@@ -151,4 +151,4 @@ def register_face():
 
 if __name__ == '__main__':
     known_face_encodings, known_face_names = initialize_known_faces()
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0')
