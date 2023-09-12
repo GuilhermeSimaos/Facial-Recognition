@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
+  <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.27/dist/sweetalert2.min.css" rel="stylesheet">
+  <title>Face Recognizer</title>
+</head>
+
+<body class="text-center bg-dark text-white mt-5">
+
+  <div class="row">
+    <div class="col">
+      <h1>Face Recognizer</h1>
+    </div>
+  </div>
+
+  <div class="row mt-5">
+    <div class="col">
+      <img src="{{url_for('video')}}" width="30%">
+    </div>
+  </div>
+
+  <div class="row mt-5 mb-5">
+    <div class="col">
+      <button class="btn btn-outline-primary btn-lg" data-bs-toggle="modal" data-bs-target="#faceModal"
+        id="btnCadastrarRosto">Cadastrar Rosto</button>
+    </div>
+  </div>
+
+  <div class="modal fade" tabindex="-1" id="faceModal">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content bg-dark text-white">
+        <div class="modal-header">
+          <h5 class="modal-title">Qual o nome do dono desse rosto?</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div id="capturedImage" style="display: none"></div>
+          <input class="form-control form-control-lg mt-3" type="text" placeholder="Nome" id="nomeRosto">
+          <div class="form-text text-white-50 text-start">Digite apenas o Nome e Sobrenome</div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-danger" data-bs-dismiss="modal">Fechar</button>
+          <button type="button" class="btn btn-primary" id="btnEnviar">Enviar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let capturedImage = document.getElementById("capturedImage")
+
+    document.getElementById('btnCadastrarRosto').addEventListener("click", function () {
+      fetch('/take_picture')
+        .then(response => response.blob())
+        .then(blob => {
+          const url = URL.createObjectURL(blob);
+          let photo = document.createElement("img");
+          photo.src = url;
+          photo.style.maxWidth = '100%'; // Set maximum width
+          photo.style.maxHeight = '200px'; // Set maximum height (adjust as needed)
+          capturedImage.innerHTML = '';
+          capturedImage.appendChild(photo);
+          capturedImage.style.display = 'block';
+        })
+        .catch(error => {
+          console.error('Error:', error);
+        });
+    });
+
+    document.getElementById('btnEnviar').addEventListener("click", function () {
+      let nomeRostoInput = document.getElementById("nomeRosto");
+
+      if (nomeRostoInput.value.trim().length < 1) {
+        nomeRostoInput.classList.add("invalid");
+        nomeRostoInput.classList.remove("valid");
+      } else {
+        nomeRostoInput.classList.add("valid");
+        nomeRostoInput.classList.remove("invalid");
+
+        // Get the captured image
+        let capturedImage = document.getElementById("capturedImage");
+        let imgElement = capturedImage.querySelector("img");
+
+        // Convert the image to base64
+        let canvas = document.createElement("canvas");
+        canvas.width = imgElement.width;
+        canvas.height = imgElement.height;
+        let ctx = canvas.getContext("2d");
+        ctx.drawImage(imgElement, 0, 0, canvas.width, canvas.height);
+
+        canvas.toBlob(function (blob) {
+          let reader = new FileReader();
+          reader.onload = function () {
+            // Send the base64-encoded image data and nomeRosto to the backend
+            sendImageData(reader.result, nomeRostoInput.value);
+          };
+          reader.readAsDataURL(blob);
+        }, 'image/jpeg');
+      }
+    });
+
+    function sendImageData(imageData, faceName) {
+      // Create an object to hold the data
+      let dataToSend = {
+        image_data: imageData,
+        face_name: faceName
+      };
+
+      // Send the data to the backend as JSON
+      fetch('/register_face', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(dataToSend)
+      })
+        .then(response => response.json())
+        .then(data => {
+          window.location.reload();
+        })
+        .catch(error => {
+          console.error('Error:', error);
+        });
+    }
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.27/dist/sweetalert2.all.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm"
+    crossorigin="anonymous"></script>
+</body>
+
+</html>
